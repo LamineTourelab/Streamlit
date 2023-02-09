@@ -13,9 +13,9 @@ import pandas as pd
 
 
 
-img_path = 'https://github.com/LamineGith/Streamlit/blob/main/logo.png?raw=true'
+img_logo = 'https://github.com/LamineGith/Streamlit/blob/main/logo.png?raw=true'
 capt = 'An android painting. Image created by the author with DALL-E'
-img_logo = 'https://github.com/LamineGith/Streamlit/blob/main/robot_painting.png?raw=true'
+img_path = 'https://github.com/LamineGith/Streamlit/blob/main/robot_painting.png?raw=true'
 
 
 def load_images():
@@ -80,7 +80,7 @@ def outputs(style, content, styled_img):
 # Create the main app
 def main():
     #Title and column
-    col1, col2 = st.columns( [0.8, 0.8])
+    col1, col2 = st.columns( [0.8, 0.2])
     with col1:               
         st.markdown(""" <style> .font {
         font-size:35px ; font-family: 'Cooper Black'; color: #000000;} 
