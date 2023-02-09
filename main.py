@@ -14,7 +14,6 @@ import pandas as pd
 
 
 img_path = 'https://github.com/LamineGith/Streamlit/blob/main/logo.png?raw=true'
-#https://github.com/SalvatoreRa/StreamStyle/blob/main/img/robot_painting.png?raw=true
 capt = 'An android painting. Image created by the author with DALL-E'
 img_logo = 'https://github.com/LamineGith/Streamlit/blob/main/robot_painting.png?raw=true'
 
@@ -102,7 +101,7 @@ def main():
     
     st.sidebar.image(logo,  width=150)
     st.sidebar.markdown("---")
-    st.sidebar.markdown("Made by [Lamine TOURE](https://www.linkedin.com/feed/)")
+    st.sidebar.markdown("Made by [Lamine TOURE](https://www.linkedin.com/in/lamine-toure-6b1744185/)")
     st.sidebar.markdown("---")
     with st.sidebar.expander("About this App"):
      st.write("""
