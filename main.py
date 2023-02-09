@@ -80,7 +80,7 @@ def outputs(style, content, styled_img):
 # Create the main app
 def main():
     #Title and column
-    col1, col2 = st.columns( [0.2, 0.8])
+    col1, col2 = st.columns( [0.8, 0.8])
     with col1:               
         st.markdown(""" <style> .font {
         font-size:35px ; font-family: 'Cooper Black'; color: #000000;} 
@@ -92,7 +92,7 @@ def main():
     with col2:
         response = requests.get(img_logo)
         logo = Image.open(BytesIO(response.content))               
-        st.image(logo,  width=150)
+        st.image(logo,  width=250)
     
     response = requests.get(img_path)
     img_screen = Image.open(BytesIO(response.content))
