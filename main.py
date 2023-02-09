@@ -80,7 +80,7 @@ def outputs(style, content, styled_img):
 # Create the main app
 def main():
     #Title and column
-    col1, col2 = st.columns( [0.8, 0.2])
+    col1, col2 = st.columns( [0.2, 0.8])
     with col1:               
         st.markdown(""" <style> .font {
         font-size:35px ; font-family: 'Cooper Black'; color: #000000;} 
