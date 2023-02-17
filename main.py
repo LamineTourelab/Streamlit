@@ -13,9 +13,9 @@ import pandas as pd
 
 
 
-img_logo = 'https://github.com/LamineGith/Streamlit/blob/main/logo.png?raw=true'
+img_logo = 'https://github.com/LamineTou/Streamlit/blob/main/logo.png?raw=true'
 capt = 'An android painting. Image created by the author with DALL-E'
-img_path = 'https://github.com/LamineGith/Streamlit/blob/main/robot_painting.png?raw=true'
+img_path = 'https://github.com/LamineTou/Streamlit/blob/main/robot_painting.png?raw=true'
 
 
 def load_images():
