@@ -3,4 +3,4 @@ Streamlit App with restoration images algorithm (on going)
 
 [GFPGAN](https://github.com/TencentARC/GFPGAN)
 
-[App](https://laminegith-streamlit-main-0vwdki.streamlit.app/)
+[Streamlit App](https://laminetou-streamlit-main-yhgn5u.streamlit.app/)
