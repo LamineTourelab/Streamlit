@@ -100,7 +100,7 @@ def main():
     
     st.sidebar.image(logo,  width=150)
     st.sidebar.markdown("---")
-    st.sidebar.markdown("Made by [Lamine TOURE](https://www.linkedin.com/in/lamine-toure-6b1744185/)")
+    st.sidebar.markdown("Made by [Lamine TOURE](https://www.linkedin.com/in/linkedin.com/in/lamine-toure/)")
     st.sidebar.markdown("---")
     with st.sidebar.expander("About this App"):
      st.write("""
