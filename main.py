@@ -1,132 +1,122 @@
-#structural libraries
-import streamlit as st
-import io
-from PIL import Image
-from io import BytesIO
-import requests
+import pandas as pd  # pip install pandas openpyxl
+import plotly.express as px  # pip install plotly-express
+import streamlit as st  # pip install streamlit
 
-#model specific libraries
-import tensorflow as tf 
-import tensorflow_hub as hub
-import numpy as np
-import pandas as pd 
+# emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
+st.set_page_config(page_title="Sales Dashboard", page_icon=":bar_chart:", layout="wide")
 
+# ---- READ EXCEL ----
+@st.cache_data
+def get_data_from_excel():
+    df = pd.read_excel(
+        io="supermarkt_sales.xlsx",
+        engine="openpyxl",
+        sheet_name="Sales",
+        skiprows=3,
+        usecols="B:R",
+        nrows=1000,
+    )
+    # Add 'hour' column to dataframe
+    df["hour"] = pd.to_datetime(df["Time"], format="%H:%M:%S").dt.hour
+    return df
 
-img_logo = 'https://github.com/LamineTourelab/Streamlit/blob/main/logo.png?raw=true'
-capt = 'An android painting. Image created by the author with DALL-E'
-img_path = 'https://github.com/LamineTouelab/Streamlit/blob/main/robot_painting.png?raw=true'
+df = get_data_from_excel()
+# ---- SIDEBAR ----
+st.sidebar.header("Please Filter Here:")
+city = st.sidebar.multiselect(
+    "Select the City:",
+    options=df["City"].unique(),
+    default=df["City"].unique()
+)
 
+customer_type = st.sidebar.multiselect(
+    "Select the Customer Type:",
+    options=df["Customer_type"].unique(),
+    default=df["Customer_type"].unique(),
+)
 
-def load_images():
-    content_img = st.file_uploader("Choose the image to paint!")
-    style_img = st.file_uploader("Choose the style!")
-    if content_img:
-            cont = content_img.getvalue()
-            content_img = Image.open(io.BytesIO(cont))
-            print('p')
-    if style_img: 
-            styl = style_img.getvalue()   
-            style_img = Image.open(io.BytesIO(styl))
-            print('p')
-    
-    return content_img, style_img
+gender = st.sidebar.multiselect(
+    "Select the Gender:",
+    options=df["Gender"].unique(),
+    default=df["Gender"].unique()
+)
 
+df_selection = df.query(
+    "City == @city & Customer_type ==@customer_type & Gender == @gender"
+)
 
-def process_input(img):
-  
-  img = tf.keras.preprocessing.image.img_to_array(img)
-  img = tf.image.convert_image_dtype(img, tf.float32)
-  shape = tf.cast(tf.shape(img)[:-1], tf.float32)
-  
-  scale = 1024 / max(shape)
-  new_shape = tf.cast(shape * scale, tf.int32)
-  img = tf.image.resize(img, new_shape)
-  img = img[tf.newaxis, :]
-  img /= 255.0
-  return img
+# Check if the dataframe is empty:
+if df_selection.empty:
+    st.warning("No data available based on the current filter settings!")
+    st.stop() # This will halt the app from further execution.
 
-def process_output(tensor):
-  tensor = tensor*255
-  tensor = np.array(tensor, dtype=np.uint8)
-  if np.ndim(tensor)>3:
-    assert tensor.shape[0] == 1
-    tensor = tensor[0]
-  return Image.fromarray(tensor)
+# ---- MAINPAGE ----
+st.title(":bar_chart: Sales Dashboard")
+st.markdown("##")
 
-def load_model():
-    model = hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
-    return model
+# TOP KPI's
+total_sales = int(df_selection["Total"].sum())
+average_rating = round(df_selection["Rating"].mean(), 1)
+star_rating = ":star:" * int(round(average_rating, 0))
+average_sale_by_transaction = round(df_selection["Total"].mean(), 2)
 
-def NST(model, content, style):
-    t_content = process_input(content)
-    t_style = process_input(style)
-    out = model(tf.constant(t_content), tf.constant(t_style))[0]
-    result = process_output(out)
-    return result
+left_column, middle_column, right_column = st.columns(3)
+with left_column:
+    st.subheader("Total Sales:")
+    st.subheader(f"US $ {total_sales:,}")
+with middle_column:
+    st.subheader("Average Rating:")
+    st.subheader(f"{average_rating} {star_rating}")
+with right_column:
+    st.subheader("Average Sales Per Transaction:")
+    st.subheader(f"US $ {average_sale_by_transaction}")
 
-def outputs(style, content, styled_img):
-    col1, col2, col3 = st.columns([0.25, 0.25, 0.25])
-    with col1:
-        st.write('Content image')
-        st.image(content)
-    with col2:
-        st.write('Style image')
-        st.image(style)
-    with col3:
-        st.write('Stylized image')
-        st.image(styled_img)
+st.markdown("""---""")
 
-# Create the main app
-def main():
-    #Title and column
-    col1, col2 = st.columns( [0.8, 0.2])
-    with col1:               
-        st.markdown(""" <style> .font {
-        font-size:35px ; font-family: 'Cooper Black'; color: #000000;} 
-        </style> """, unsafe_allow_html=True)
-        st.markdown('<p class="font">StreamStyle</p>', unsafe_allow_html=True)
-        
-        
-        
-    with col2:
-        response = requests.get(img_logo)
-        logo = Image.open(BytesIO(response.content))               
-        st.image(logo,  width=150)
-    
-    response = requests.get(img_path)
-    img_screen = Image.open(BytesIO(response.content))
-    st.image(img_screen, caption=capt, width=None, use_column_width=None, clamp=False, channels="RGB", output_format="auto")
-    st.subheader('Transform the style of your image with AI')
-    
-    st.sidebar.image(logo,  width=150)
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("Made by [Lamine TOURE](https://www.linkedin.com/in/linkedin.com/in/lamine-toure/)")
-    st.sidebar.markdown("---")
-    with st.sidebar.expander("About this App"):
-     st.write("""
-        This simple app is using **Neural Style Transfer** to apply the style of an image to another.
-     """)
-    with st.sidebar.expander("About Neural Style Transfer"):
-        st.write("""
-        Neural style transfer is a technique in computer vision that allows for the creation of new images or videos by combining the content of one image or video with the style of another image or video. It is based on the idea of using deep neural networks to separate the content and style representations of an image and then recombining them in a new image that combines the content of the first with the style of the second. This technique has been used to create a wide range of applications, including the generation of artistic images and the creation of realistic virtual environments. It has also been used to improve the performance of machine learning models by providing a way to transfer knowledge from one domain to another. Neural style transfer has the potential to revolutionize the field of computer vision and has already had a significant impact on the way we think about and interact with images and videos.
-        (this is written by ChatGPT)
-        """)
+# SALES BY PRODUCT LINE [BAR CHART]
+sales_by_product_line = df_selection.groupby(by=["Product line"])[["Total"]].sum().sort_values(by="Total")
+fig_product_sales = px.bar(
+    sales_by_product_line,
+    x="Total",
+    y=sales_by_product_line.index,
+    orientation="h",
+    title="<b>Sales by Product Line</b>",
+    color_discrete_sequence=["#0083B8"] * len(sales_by_product_line),
+    template="plotly_white",
+)
+fig_product_sales.update_layout(
+    plot_bgcolor="rgba(0,0,0,0)",
+    xaxis=(dict(showgrid=False))
+)
 
-    content, style = load_images()
-    if content and style:
-        model = load_model()
-        styled_img = NST(model, content, style)
-        outputs(style, content, styled_img)
-        buf = BytesIO()
-        styled_img.save(buf, format="JPEG")
-        byte_im =buf.getvalue()
-        st.download_button(
-            label="Download Image",
-            data=byte_im,
-            file_name="styled_img"+".jpg",
-            mime="image/jpg"
-            )
+# SALES BY HOUR [BAR CHART]
+sales_by_hour = df_selection.groupby(by=["hour"])[["Total"]].sum()
+fig_hourly_sales = px.bar(
+    sales_by_hour,
+    x=sales_by_hour.index,
+    y="Total",
+    title="<b>Sales by hour</b>",
+    color_discrete_sequence=["#0083B8"] * len(sales_by_hour),
+    template="plotly_white",
+)
+fig_hourly_sales.update_layout(
+    xaxis=dict(tickmode="linear"),
+    plot_bgcolor="rgba(0,0,0,0)",
+    yaxis=(dict(showgrid=False)),
+)
 
 
-if __name__ == "__main__":
-    main()
+left_column, right_column = st.columns(2)
+left_column.plotly_chart(fig_hourly_sales, use_container_width=True)
+right_column.plotly_chart(fig_product_sales, use_container_width=True)
+
+
+# ---- HIDE STREAMLIT STYLE ----
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
